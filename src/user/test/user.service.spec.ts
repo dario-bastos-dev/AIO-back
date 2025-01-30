@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { User, UserBody } from 'src/@types/user';
+import { User, UserBody } from 'src/user/types/user';
 import UserRepository from '../repositories/user.repository';
 import { UserService } from '../user.service';
 
@@ -33,7 +33,7 @@ describe('UserService', () => {
 		const userBody: UserBody = {
 			name: 'John Doe',
 			email: 'john5@example.com',
-			password: 'password123',
+			password: 'john5@example.com',
 		};
 
 		// Act

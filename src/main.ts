@@ -6,6 +6,16 @@ async function bootstrap() {
 	// Cria a aplicação Nest
 	const app = await NestFactory.create(AppModule);
 
+	// Configurando o Cors
+	app.enableCors({
+		origin: '*',
+		methods: 'GET,PUT,POST,DELETE',
+		allowedHeaders: 'Content-Type, Authorization',
+		preflightContinue: false,
+		optionsSuccessStatus: 204,
+		credentials: true,
+	});
+
 	// Configuração do Swagger para documentação da API
 	const config = new DocumentBuilder()
 		.setTitle('All In One - AIO')

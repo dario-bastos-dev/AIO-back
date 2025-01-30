@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
-import { User, UserBody, UserModel } from 'src/@types/user';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { User, UserBody, UserModel } from 'src/user/types/user';
 import { ZodError } from 'zod';
 import PrismaErrorCode from '../../@types/prisma';
 import { CreateUserSchema, LoginUserSchema } from '../schemas/user.schema';
@@ -10,18 +11,17 @@ import { CreateUserSchema, LoginUserSchema } from '../schemas/user.schema';
 export default class UserRepository implements UserModel {
 	private _user: User | null = null;
 	private _error: string[] = [];
-	private _prisma = new PrismaClient();
 
-	constructor(private _body: UserBody | null) {}
+	constructor(private readonly _prisma: PrismaService) {}
 	// Funções para manipular o banco de dados
 	// POST - registro
-	public async register() {
-		if (this._body == null) {
+	public async register(body: UserBody) {
+		if (body == null) {
 			this._error.push('No data provided');
 			return { data: null, error: this._error };
 		}
 		try {
-			const { name, email, password } = CreateUserSchema.parse(this._body);
+			const { name, email, password } = CreateUserSchema.parse(body);
 
 			const salt = bcrypt.genSaltSync(10);
 			const hash = bcrypt.hashSync(password, salt);
@@ -56,13 +56,13 @@ export default class UserRepository implements UserModel {
 	}
 
 	// POST - login
-	public async login() {
-		if (this._body == null) {
+	public async login(body: UserBody) {
+		if (body == null) {
 			this._error.push('No data provided');
 			return { data: null, error: this._error };
 		}
 		try {
-			const { email, password } = LoginUserSchema.parse(this._body);
+			const { email, password } = LoginUserSchema.parse(body);
 
 			this._user = await this._prisma.user.findFirst({
 				where: {
@@ -101,6 +101,64 @@ export default class UserRepository implements UserModel {
 						break;
 					default:
 						this._error.push('Ocorreu um erro ao tentar fazer login');
+				}
+			return { data: null, error: this._error };
+		}
+	}
+
+	// GET - Find all users
+	public async findAll() {
+		try {
+			const users = await this._prisma.user.findMany({
+				orderBy: {
+					createdAt: 'asc',
+				},
+			});
+
+			return { data: users, error: null };
+		} catch (error) {
+			console.log(error);
+
+			if (error instanceof Prisma.PrismaClientKnownRequestError)
+				switch (error.code) {
+					case PrismaErrorCode.RECORD_NOT_FOUND:
+						this._error.push('Nenhum usuário encontrado');
+						break;
+					case PrismaErrorCode.OPERATION_FAILED:
+						this._error.push('Erro ao tentar buscar usuários');
+						break;
+					default:
+						this._error.push('Ocorreu um erro ao tentar buscar usuários');
+				}
+			return { data: null, error: this._error };
+		}
+	}
+	// GET - Find all users
+	public async find(id: string) {
+		try {
+			this._user = await this._prisma.user.findUnique({
+				where: { id },
+			});
+
+			if (this._user == null) {
+				this._error.push('Nenhum usuário encontrado');
+				return { data: null, error: this._error };
+			}
+
+			return { data: this._user, error: null };
+		} catch (error) {
+			console.log(error);
+
+			if (error instanceof Prisma.PrismaClientKnownRequestError)
+				switch (error.code) {
+					case PrismaErrorCode.RECORD_NOT_FOUND:
+						this._error.push('Nenhum usuário encontrado');
+						break;
+					case PrismaErrorCode.OPERATION_FAILED:
+						this._error.push('Erro ao tentar buscar usuários');
+						break;
+					default:
+						this._error.push('Ocorreu um erro ao tentar buscar usuários');
 				}
 			return { data: null, error: this._error };
 		}

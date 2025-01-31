@@ -1,11 +1,22 @@
-import { User, UserBody } from 'src/user/types/user';
+import {
+	AllUsersResponse,
+	User,
+	UserBody,
+	UserResponse,
+} from 'src/user/types/user';
 
 export class CreateUserDto implements UserBody {
 	name!: string;
 	email!: string;
 	password!: string;
 }
-export class ResponseUserDto {
+
+export class UpadateUserDto implements UserBody {
+	name?: string;
+	email?: string;
+	password?: string;
+}
+export class ResponseUserDto implements UserResponse {
 	status!: string;
 	message!: string;
 	data!: {
@@ -24,7 +35,7 @@ export class ResponseUserDto {
 	} | null;
 }
 
-export class ResponseAllUsersDto {
+export class ResponseAllUsersDto implements AllUsersResponse {
 	status!: string;
 	message!: string;
 	data!: User[] | null;

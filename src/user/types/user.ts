@@ -10,12 +10,18 @@ type Response<T> = {
 export interface UserModel {
 	register(body: UserBody): Promise<UserReturn<User>>;
 	login(body: UserBody): Promise<UserReturn<User>>;
+	findAll(): Promise<UserReturn<User[]>>;
+	find(id: String): Promise<UserReturn<User>>;
+	update(id: String, body: UserBody): Promise<UserReturn<User>>;
 }
 
 // Interfaces dos métodos do service
 export interface UserServiceType {
 	register(body: UserBody): Promise<UserResponse>;
 	login(body: UserBody): Promise<UserResponse>;
+	findAll(): Promise<AllUsersResponse>;
+	find(id: String): Promise<UserResponse>;
+	update(id: String, body: UserBody): Promise<UserResponse>;
 }
 
 // Interface do body da requisição
@@ -33,6 +39,9 @@ export interface User extends UserBody {
 	updatedAt?: Date;
 }
 
+// Interface de update do usuário
+export interface UserUpdate extends UserBody {}
+
 // Interface all users
 export interface AllUsers {
 	name: string;
@@ -45,10 +54,6 @@ export interface AllUsers {
 	roleId: string | null;
 }
 [];
-/*export interface UserError {
-  code: number;
-  details: string[];
-}*/
 // Interface da resposta da requisição
 export interface UserResponse extends Response<User> {}
 

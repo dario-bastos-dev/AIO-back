@@ -10,3 +10,12 @@ export const LoginUserSchema = z.object({
 export const CreateUserSchema = LoginUserSchema.extend({
 	name: z.string().min(5).nonempty(),
 });
+
+export const UserIdSchema = z.string().uuid().nonempty();
+
+// Upadate user
+export const UpdateUserSchema = z.object({
+	name: z.string().min(5).optional(),
+	email: z.string().email().optional(),
+	password: z.string().min(8).optional(),
+});
